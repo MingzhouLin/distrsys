@@ -134,7 +134,7 @@ public class Client {
     }
 
     public void getRecordCounts(CenterServer stub, String managerId) throws RemoteException, NotBoundException {
-        System.out.println(stub.getRecordCounts(managerId));
+        System.out.println(stub.getRecordCountsbyUDP(managerId));
     }
 
     public void editRecord(CenterServer stub, String managerId) throws Exception {

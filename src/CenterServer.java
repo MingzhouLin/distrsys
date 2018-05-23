@@ -10,5 +10,5 @@ public interface CenterServer extends Remote {
     public String getRecordCounts (String managerId) throws RemoteException, NotBoundException;
     public String editRecord ( String managerId,String recordID, String fieldName,String newValue) throws Exception;
     public int getLocalRecordCount() throws RemoteException;
-
+    public String getRecordCountsbyUDP(String managerId) throws RemoteException, NotBoundException;
 }
