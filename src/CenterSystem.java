@@ -7,6 +7,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CenterSystem extends UnicastRemoteObject implements CenterServer {
@@ -71,14 +73,16 @@ public class CenterSystem extends UnicastRemoteObject implements CenterServer {
         TeacherRecord teacherRecord = new TeacherRecord(firstName, lastName, address, phone, specialization, location);
         char key = lastName.charAt(0);
         validateRecordId(teacherRecord, key);
-        if (database.get(key) == null) {
-            ArrayList<Records> value = new ArrayList<>();
-            value.add(teacherRecord);
-            database.put(key, value);
-        } else {
-            ArrayList<Records> value = database.get(key);
-            value.add(teacherRecord);
-            database.put(key, value);
+        synchronized (this) {
+            if (database.get(key) == null) {
+                ArrayList<Records> value = new ArrayList<>();
+                value.add(teacherRecord);
+                database.put(key, value);
+            } else {
+                ArrayList<Records> value = database.get(key);
+                value.add(teacherRecord);
+                database.put(key, value);
+            }
         }
         Log.log(Log.getCurrentTime(), centerName, managerId, "createTRecord", "Successful");
         return teacherRecord.getRecordID();
@@ -125,8 +129,14 @@ public class CenterSystem extends UnicastRemoteObject implements CenterServer {
         Log.log(Log.getCurrentTime(),centerName,managerId,"getRecordCounts","Successful");
         return result;
     }
-    public int getLocalRecordCount() throws RemoteException{
-        return this.database.size();
+
+    public int getLocalRecordCount() throws RemoteException {
+        int sum=0;
+        for (ArrayList<Records> records:
+             database.values()) {
+            sum+=records.size();
+        }
+        return sum;
     }
 
     public String editRecord(String managerId, String recordID, String fieldName, String newValue) throws Exception {
